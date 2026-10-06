@@ -1,0 +1,896 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Mind Garden</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,600&display=swap" rel="stylesheet">
+  <style>
+/* ---------- Colors & basics ---------- */
+:root {
+  --sky: #e6f4ee;
+  --leaf: #2f7d4f;
+  --leaf-dark: #1f5a38;
+  --sun: #ffd45e;
+  --soil: #8a5a3c;
+  --soil-dark: #6b4429;
+  --ink: #23352b;
+  }
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: "Fredoka", system-ui, sans-serif;
+  color: var(--ink);
+  background: linear-gradient(#cfeaf7 0, var(--sky) 360px);
+  min-height: 100vh;
+}
+
+h1, h2 { margin: 0 0 .5rem; }
+[hidden] { display: none !important; }
+
+/* ---------- Navigation ---------- */
+.nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: .8rem 1.2rem;
+  flex-wrap: wrap;
+  gap: .5rem;
+}
+.logo { font-weight: 600; font-size: 1.2rem; color: var(--leaf-dark); }
+.nav-btn {
+  font: inherit; border: 0; background: none; cursor: pointer;
+  padding: .4rem .9rem; border-radius: 999px; color: var(--ink);
+}
+.nav-btn.active { background: #fff; color: var(--leaf-dark); font-weight: 500; }
+
+/* ---------- Buttons ---------- */
+.btn {
+  font: inherit; font-weight: 500; cursor: pointer;
+  background: var(--leaf); color: #fff;
+  border: 0; border-radius: 999px; padding: .6rem 1.3rem;
+  transition: transform .15s, background .15s;
+}
+.btn:hover { background: var(--leaf-dark); transform: translateY(-2px); }
+.btn:disabled { background: #a9b9b0; cursor: default; transform: none; }
+.btn.big { font-size: 1.2rem; padding: .8rem 2rem; background: var(--sun); color: var(--ink); }
+.btn.big:hover { background: #ffc933; }
+.btn.ghost { background: #e4ece7; color: var(--ink); }
+.link { font: inherit; background: none; border: 0; color: var(--soil-dark); cursor: pointer; text-decoration: underline; }
+
+:focus-visible { outline: 3px solid var(--sun); outline-offset: 2px; }
+
+/* ---------- Home ---------- */
+.view { max-width: 900px; margin: 0 auto; padding: 1rem 1.2rem 3rem; }
+.hero { text-align: center; padding: 2rem 0 1.5rem; }
+.hero h1 { font-size: clamp(2.6rem, 9vw, 4.5rem); color: var(--leaf-dark); }
+.tagline { font-size: 1.4rem; margin: 0 0 .8rem; }
+.intro { max-width: 460px; margin: 0 auto 1.5rem; line-height: 1.5; }
+
+.panel { background: #fff; border-radius: 20px; padding: 1.2rem; }
+.chips { display: flex; flex-wrap: wrap; gap: .6rem; }
+.chip {
+  display: flex; align-items: center; gap: .4rem;
+  font: inherit; cursor: pointer; border: 2px solid #d6e8dd;
+  background: var(--sky); border-radius: 999px; padding: .3rem .9rem .3rem .4rem;
+}
+.chip:hover { border-color: var(--leaf); }
+.chip svg { width: 32px; height: 32px; }
+.empty { color: #5f7468; margin: 0; }
+
+/* ---------- Garden ---------- */
+.garden-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+.garden-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 1rem;
+}
+.plot {
+  font: inherit; cursor: pointer; border: 0; padding: 0;
+  border-radius: 18px; overflow: hidden; background: #fff;
+  display: flex; flex-direction: column; text-align: center;
+  transition: transform .15s;
+}
+.plot:hover { transform: translateY(-4px); }
+.plot svg { width: 100%; height: 130px; background: #d8f0fa; }
+.plot .soil { background: var(--soil); color: #fff; padding: .5rem; }
+.plot .soil small { display: block; opacity: .85; }
+
+/* ---------- Plant animation ---------- */
+.plant-svg .grow { transform-origin: 50px 90px; animation: grow .8s ease-out; }
+@keyframes grow {
+  from { transform: scale(.4); opacity: .3; }
+  to   { transform: scale(1);  opacity: 1; }
+}
+
+/* ---------- Dialogs ---------- */
+dialog {
+  border: 0; border-radius: 24px; padding: 1.4rem;
+  width: min(440px, 92vw); max-height: 92vh; color: var(--ink); font-family: inherit;
+}
+dialog::backdrop { background: rgba(20, 50, 35, .45); }
+form label { display: block; margin-bottom: .8rem; font-weight: 500; }
+input, textarea, select {
+  display: block; width: 100%; margin-top: .25rem;
+  font: inherit; padding: .5rem .7rem;
+  border: 2px solid #d6e8dd; border-radius: 12px;
+}
+.row { display: flex; justify-content: space-between; gap: .6rem; margin-top: .8rem; }
+
+/* ---------- Detail view ---------- */
+.detail-plant { position: relative; background: #d8f0fa; border-radius: 16px; overflow: hidden; }
+.detail-plant svg { display: block; width: 100%; height: 190px; }
+.msg { text-align: center; color: var(--leaf-dark); font-weight: 500; margin: .4rem 0; min-height: 1.4em; }
+dl { margin: 0; }
+dt { font-weight: 600; font-size: .85rem; color: var(--leaf); margin-top: .5rem; }
+dd { margin: 0; }
+.bar { height: 12px; background: #e4ece7; border-radius: 999px; overflow: hidden; }
+#d-bar { height: 100%; width: 0; background: var(--leaf); transition: width .5s; }
+
+/* Water drops */
+.drop {
+  position: absolute; top: -10px; width: 8px; height: 12px;
+  background: var(--water); border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+  animation: fall .9s ease-in forwards;
+}
+@keyframes fall { to { transform: translateY(190px); opacity: .2; } }
+
+/* To-do list */
+.todo-title { margin: 1rem 0 .4rem; font-size: 1.05rem; }
+.todo-title span { color: var(--leaf); font-weight: 400; font-size: .9rem; }
+.task-form { display: flex; gap: .5rem; }
+.task-form input { margin-top: 0; }
+.tasks { list-style: none; margin: .6rem 0; padding: 0; display: grid; gap: .4rem; }
+.task { display: flex; align-items: center; gap: .5rem; background: var(--sky); border-radius: 12px; padding: .4rem .6rem; }
+.task input[type=checkbox] { width: 20px; height: 20px; margin: 0; border: 0; accent-color: var(--leaf); flex: none; }
+.task .text { flex: 1; word-break: break-word; }
+.task.done .text { text-decoration: line-through; opacity: .6; }
+.task .edit-input { margin: 0; padding: .3rem .5rem; }
+.icon-btn { font: inherit; border: 0; background: none; cursor: pointer; padding: .2rem .4rem; border-radius: 8px; }
+.icon-btn:hover { background: #fff; }
+.more { color: #5f7468; font-size: .9rem; margin: 0; }
+.btn.wide { width: 100%; }
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
+}
+
+/* ============================================================
+   VISUAL POLISH
+   ============================================================ */
+
+/* Sky, sun, clouds and hills */
+body { background: linear-gradient(#bfe3f5 0, #e6f4ee 420px); background-attachment: fixed; }
+body::after {
+  content: ""; position: fixed; left: 0; right: 0; bottom: 0; height: 110px; z-index: -2;
+  background:
+    radial-gradient(ellipse 60% 100% at 20% 100%, #9fd9ae 60%, transparent 61%),
+    radial-gradient(ellipse 70% 90% at 75% 100%, #7cc795 60%, transparent 61%);
+}
+.sky { position: fixed; inset: 0 0 auto 0; height: 320px; overflow: hidden; z-index: -1; pointer-events: none; }
+.sun {
+  position: absolute; top: 26px; right: 8%; width: 70px; height: 70px; border-radius: 50%;
+  background: #ffe27a; box-shadow: 0 0 0 14px rgba(255, 226, 122, .35), 0 0 50px 20px rgba(255, 226, 122, .5);
+  animation: glow 5s ease-in-out infinite;
+}
+@keyframes glow { 50% { transform: scale(1.06); box-shadow: 0 0 0 20px rgba(255, 226, 122, .3), 0 0 60px 26px rgba(255, 226, 122, .5); } }
+.cloud { position: absolute; width: 90px; height: 28px; background: #fff; border-radius: 999px; opacity: .85; animation: drift 70s linear infinite; }
+.cloud::before, .cloud::after { content: ""; position: absolute; background: #fff; border-radius: 50%; }
+.cloud::before { width: 40px; height: 40px; left: 14px; top: -20px; }
+.cloud::after { width: 30px; height: 30px; left: 46px; top: -14px; }
+.c1 { top: 70px; left: -120px; }
+.c2 { top: 150px; left: -120px; animation-duration: 95s; animation-delay: -40s; transform: scale(.75); }
+@keyframes drift { to { translate: calc(100vw + 260px); } }
+
+/* Navigation */
+.nav { position: sticky; top: 0; z-index: 5; background: rgba(255, 255, 255, .6); backdrop-filter: blur(8px); }
+.nav-btn { transition: background .2s; }
+.nav-btn:hover { background: rgba(255, 255, 255, .8); }
+
+/* Buttons */
+.btn { box-shadow: 0 3px 0 rgba(0, 0, 0, .15); }
+.btn:active { transform: translateY(1px); box-shadow: 0 1px 0 rgba(0, 0, 0, .15); }
+.btn.big { box-shadow: 0 5px 0 #e0b23a; animation: bounce 3s ease-in-out infinite; }
+@keyframes bounce { 0%, 85%, 100% { translate: 0 0; } 92% { translate: 0 -6px; } }
+.hero h1 { text-shadow: 0 3px 0 rgba(255, 255, 255, .8); }
+
+/* Cards */
+.panel { box-shadow: 0 8px 24px rgba(31, 90, 56, .12); }
+.chip { transition: transform .15s, border-color .15s; }
+.chip:hover { transform: translateY(-2px) rotate(-1deg); }
+.plot { box-shadow: 0 8px 20px rgba(31, 90, 56, .15); transition: transform .2s, box-shadow .2s; }
+.plot:hover { transform: translateY(-6px) rotate(-1deg); box-shadow: 0 14px 26px rgba(31, 90, 56, .22); }
+.plot svg, .detail-plant { background: linear-gradient(#c8e8f7, #eaf8f1); }
+.plot .soil { border-top: 5px solid #5bb877; background: linear-gradient(var(--soil), var(--soil-dark)); }
+.mini { height: 6px; background: rgba(0, 0, 0, .25); border-radius: 999px; margin-top: .35rem; overflow: hidden; }
+.mini i { display: block; height: 100%; background: #b8f0a0; border-radius: 999px; transition: width .5s; }
+
+/* Plant motion */
+.plant-svg .sway { transform-origin: 50px 90px; animation: sway 4s ease-in-out infinite; }
+.plant-svg .bob { animation: bob 2.5s ease-in-out infinite; }
+.plant-svg .spark { animation: twinkle 1.8s ease-in-out infinite; }
+.plant-svg .s2 { animation-delay: .6s; }
+.plant-svg .s3 { animation-delay: 1.2s; }
+@keyframes sway { 0%, 100% { transform: rotate(-2deg); } 50% { transform: rotate(2deg); } }
+@keyframes bob { 50% { transform: translateY(-1.5px); } }
+@keyframes twinkle { 0%, 100% { opacity: .2; } 50% { opacity: 1; } }
+.plant-svg .grow { animation: grow .9s cubic-bezier(.3, 1.6, .5, 1); }
+
+/* Dialogs */
+dialog[open] { animation: pop .25s ease-out; box-shadow: 0 20px 50px rgba(0, 0, 0, .25); }
+dialog::backdrop { backdrop-filter: blur(3px); }
+@keyframes pop { from { transform: scale(.92); opacity: 0; } }
+input:focus, textarea:focus, select:focus { outline: none; border-color: var(--leaf); box-shadow: 0 0 0 3px rgba(47, 125, 79, .2); }
+
+/* Progress bar and tasks */
+.bar { height: 14px; }
+#d-bar { background: linear-gradient(90deg, #4fa86b, #b8e06a); }
+.task { transition: background .2s; }
+.task.done { background: #d8f0df; }
+
+/* Petals when an idea is fully grown */
+.petal { position: absolute; top: -20px; font-size: 18px; animation: petal 1.8s ease-in forwards; }
+@keyframes petal { to { transform: translateY(220px) rotate(360deg); opacity: 0; } }
+
+@media (prefers-reduced-motion: reduce) { .cloud, .sun, .btn.big { animation: none !important; } }
+
+/* ============================================================
+   HIGH-CONTRAST TYPOGRAPHY
+   Headings: Playfair Display (thick and thin strokes)
+   Body: Fredoka, darker and a little bolder for easy reading
+   ============================================================ */
+:root { --ink: #0f1f17; --muted: #3d5246; }
+
+body { font-weight: 500; }
+h1, h2, h3, .logo, #d-name {
+  font-family: "Playfair Display", Georgia, "Times New Roman", serif;
+  font-weight: 900;
+  color: #0f2a1b;
+  letter-spacing: -0.01em;
+}
+.hero h1 { font-size: clamp(3rem, 10vw, 5.2rem); line-height: 1.05; color: #0f2a1b; }
+.tagline { font-family: "Playfair Display", Georgia, serif; font-style: italic; font-weight: 600; font-size: 1.6rem; color: var(--ink); }
+.intro { font-size: 1.05rem; color: var(--ink); }
+.logo { font-size: 1.3rem; }
+h2 { font-size: 1.7rem; }
+.todo-title { font-size: 1.15rem; }
+
+/* Stronger text colors */
+.empty, .more, .msg { color: var(--muted); }
+.msg { font-weight: 600; }
+dt { color: #1f5a38; font-weight: 600; }
+.todo-title span { color: #1f5a38; }
+.plot .soil small { opacity: 1; }
+.plot .soil strong { font-weight: 600; }
+.task.done .text { opacity: .75; }
+.link { color: #5a3820; font-weight: 500; }
+
+/* Text under garden plants: dark text on a light sand strip */
+.plot .soil { background: #f3e6cf; color: #1a1209; border-top: 5px solid #5bb877; }
+.plot .soil strong { color: #1a1209; font-size: 1.05rem; }
+.plot .soil small { color: #3b2a14; font-weight: 500; }
+.mini { background: rgba(0, 0, 0, .12); }
+.mini i { background: #3f9b5f; }
+
+/* ============================================================
+   VISIBLE TEXT COLORS
+   Every piece of text gets an explicit dark or white color, so nothing
+   turns pale or invisible (for example when a phone is in dark mode).
+   ============================================================ */
+:root { color-scheme: light; }
+
+body, dialog, .panel, dd, li { color: var(--ink); }
+button, input, textarea, select { color: var(--ink); }
+input, textarea, select { background: #fff; }
+::placeholder { color: #55665c; opacity: 1; }
+
+.nav-btn, .chip { color: var(--ink); }
+.nav-btn.active { color: #0f2a1b; }
+
+.btn { color: #fff; }
+.btn.big { color: #1a1209; }
+.btn.ghost { color: var(--ink); }
+.btn:disabled { background: #6f8277; color: #fff; }
+
+/* ============================================================
+   REALISTIC SCENE
+   ============================================================ */
+body { background: #bfe3f5; }
+body::after { display: none; }
+.scene { position: fixed; inset: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none; }
+.rays { transform-origin: 1220px 140px; animation: spin 140s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.cl { animation: cdrift 140s linear infinite; }
+@keyframes cdrift { from { transform: translateX(-260px); } to { transform: translateX(1700px); } }
+
+/* Plant backdrops inside cards and the details window */
+.plot svg, .detail-plant {
+  background:
+    radial-gradient(circle at 82% 14%, #fffbe0 0 5%, rgba(255, 240, 170, .7) 6%, transparent 30%),
+    radial-gradient(ellipse 120% 38% at 50% 108%, #6fbf6f 58%, transparent 59%),
+    linear-gradient(#7cc4ee, #d9f1fa);
+}
+.plot svg { height: 150px; }
+.detail-plant svg { height: 230px; }
+.plant-svg { filter: drop-shadow(0 2px 2px rgba(0, 0, 0, .2)); }
+.detail-plant, .plot { box-shadow: 0 10px 24px rgba(20, 70, 40, .22); }
+
+@media (prefers-reduced-motion: reduce) { .rays, .cl { animation: none !important; } }
+
+/* "Your plants" cards on the home page: plant + name + why + stage */
+.chips { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: .8rem; }
+.chip { text-align: left; border-radius: 16px; padding: .5rem .9rem .5rem .5rem; align-items: center; gap: .7rem; }
+.chip svg { width: 68px; height: 68px; flex: none; border-radius: 12px;
+  background: radial-gradient(ellipse 120% 38% at 50% 108%, #6fbf6f 58%, transparent 59%), linear-gradient(#7cc4ee, #d9f1fa); }
+.chip-text { display: grid; gap: 2px; min-width: 0; }
+.chip-text strong { font-family: "Playfair Display", Georgia, serif; font-weight: 900; font-size: 1.05rem; color: #0f2a1b; }
+.chip-text em { font-style: normal; color: var(--muted); font-size: .9rem; line-height: 1.3;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.chip-text small { color: #1f5a38; font-weight: 600; }
+
+/* Idea details window: clear text colors and polished buttons */
+.detail dt { color: #1f5a38; font-weight: 600; }
+.detail dd { color: #0f1f17; font-weight: 500; line-height: 1.4; }
+#d-pct { color: #0f2a1b; font-weight: 600; display: inline-block; margin-top: .25rem; }
+.detail .msg { color: #1f5a38; }
+.detail .todo-title { color: #0f2a1b; }
+
+.actions { border-top: 2px dashed #c3d9cb; padding-top: 1rem; margin-top: 1.1rem; }
+.actions .btn { flex: 1; text-align: center; }
+.btn.ghost { background: #e4ece7; color: #0f2a1b; border: 2px solid #b9cdc1; box-shadow: none; }
+.btn.ghost:hover { background: #d3e3d9; transform: translateY(-2px); }
+.btn.danger { background: #fff; color: #a11d1d; border: 2px solid #a11d1d; box-shadow: none; }
+.btn.danger:hover { background: #a11d1d; color: #fff; }
+
+/* ============================================================
+   DARK IDEA WINDOWS (idea details and "All to-do's")
+   Black background with light text for easy reading
+   ============================================================ */
+:is(#detail-dialog, #todo-dialog) { background: #0b130e; color: #f1f7f3; color-scheme: dark; border: 1px solid #25382d; }
+:is(#detail-dialog, #todo-dialog)::backdrop { background: rgba(0, 0, 0, .65); }
+
+:is(#detail-dialog, #todo-dialog) :is(h2, h3, #d-name, .todo-title) { color: #ffffff; }
+:is(#detail-dialog, #todo-dialog) .msg { color: #b9f0c8; }
+#detail-dialog dt { color: #8fe0a8; }
+#detail-dialog dd { color: #f4faf6; }
+#detail-dialog #d-pct { color: #ffffff; }
+#detail-dialog .todo-title span { color: #8fe0a8; }
+#detail-dialog .bar { background: #26372d; }
+
+:is(#detail-dialog, #todo-dialog) .task { background: #1a2920; color: #f1f7f3; }
+:is(#detail-dialog, #todo-dialog) .task.done { background: #153021; }
+:is(#detail-dialog, #todo-dialog) .task.done .text { color: #cfe8d7; opacity: .8; }
+:is(#detail-dialog, #todo-dialog) .task input[type=checkbox] { accent-color: #5fd68a; }
+:is(#detail-dialog, #todo-dialog) .icon-btn { color: #ffffff; }
+:is(#detail-dialog, #todo-dialog) .icon-btn:hover { background: #2b4033; }
+:is(#detail-dialog, #todo-dialog) .more { color: #a9c2b2; }
+:is(#detail-dialog, #todo-dialog) :is(.task-form input, .edit-input) { background: #f4faf6; color: #0f1f17; border-color: #3a5043; }
+
+:is(#detail-dialog, #todo-dialog) .btn.ghost { background: #223329; color: #ffffff; border-color: #3d5a49; }
+:is(#detail-dialog, #todo-dialog) .btn.ghost:hover { background: #2d4538; }
+#detail-dialog .btn.danger { background: transparent; color: #ff9a9a; border-color: #ff9a9a; }
+#detail-dialog .btn.danger:hover { background: #d93636; border-color: #d93636; color: #ffffff; }
+#detail-dialog .actions { border-top-color: #2e4337; }
+
+</style>
+</head>
+<body>
+  <!-- Decorative sky -->
+  <svg class="scene" aria-hidden="true" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMax slice" xmlns="http://www.w3.org/2000/svg">
+<defs>
+ <linearGradient id="skyG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4fb0ec"/><stop offset=".45" stop-color="#8fd0f3"/><stop offset=".72" stop-color="#d8f0f7"/><stop offset="1" stop-color="#eef9ee"/></linearGradient>
+ <radialGradient id="sunG"><stop offset="0" stop-color="#fffef0"/><stop offset=".55" stop-color="#ffec8a"/><stop offset="1" stop-color="#ffc83a"/></radialGradient>
+ <radialGradient id="glowG"><stop offset="0" stop-color="#fff6c8" stop-opacity=".95"/><stop offset=".4" stop-color="#ffe68c" stop-opacity=".3"/><stop offset="1" stop-color="#ffe68c" stop-opacity="0"/></radialGradient>
+ <radialGradient id="rayG" gradientUnits="userSpaceOnUse" cx="1220" cy="140" r="520"><stop offset="0" stop-color="#fff4b0" stop-opacity=".5"/><stop offset="1" stop-color="#fff4b0" stop-opacity="0"/></radialGradient>
+ <linearGradient id="hillFar" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#a9d9a4"/><stop offset="1" stop-color="#7dbf84"/></linearGradient>
+ <linearGradient id="hillMid" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#77c277"/><stop offset="1" stop-color="#4c9e55"/></linearGradient>
+ <linearGradient id="hillNear" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#58aa52"/><stop offset="1" stop-color="#2d7a39"/></linearGradient>
+ <radialGradient id="treeG" cx=".35" cy=".3" r=".8"><stop offset="0" stop-color="#7fd07a"/><stop offset="1" stop-color="#2f8a46"/></radialGradient>
+ <linearGradient id="leafG" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#8fe08f"/><stop offset=".5" stop-color="#3aa05a"/><stop offset="1" stop-color="#1f6e3d"/></linearGradient>
+ <linearGradient id="leafL" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#b9ef90"/><stop offset=".5" stop-color="#5cbf6a"/><stop offset="1" stop-color="#2e8a4a"/></linearGradient>
+ <linearGradient id="stemG" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#2e7d46"/><stop offset=".5" stop-color="#63b872"/><stop offset="1" stop-color="#2a6e3e"/></linearGradient>
+ <linearGradient id="soilG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#9c6b45"/><stop offset="1" stop-color="#58361f"/></linearGradient>
+ <radialGradient id="seedG" cx=".35" cy=".3" r=".8"><stop offset="0" stop-color="#c89b6a"/><stop offset=".5" stop-color="#6b4426"/><stop offset="1" stop-color="#3b2410"/></radialGradient>
+ <linearGradient id="petalG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff07a"/><stop offset=".55" stop-color="#ffc21a"/><stop offset="1" stop-color="#f39a00"/></linearGradient>
+ <radialGradient id="centerG"><stop offset="0" stop-color="#7a4a22"/><stop offset=".6" stop-color="#3a2010"/><stop offset="1" stop-color="#1e1006"/></radialGradient>
+ <filter id="soft"><feGaussianBlur stdDeviation="2.5"/></filter>
+</defs>
+<rect width="1440" height="900" fill="url(#skyG)"/>
+<circle cx="1220" cy="140" r="280" fill="url(#glowG)"/>
+<g class="rays"><path d="M1220 140 L1739 113 L1739 167Z" fill="url(#rayG)"/><path d="M1220 140 L1717 292 L1699 343Z" fill="url(#rayG)"/><path d="M1220 140 L1635 453 L1600 495Z" fill="url(#rayG)"/><path d="M1220 140 L1503 576 L1456 603Z" fill="url(#rayG)"/><path d="M1220 140 L1337 647 L1283 656Z" fill="url(#rayG)"/><path d="M1220 140 L1157 656 L1103 647Z" fill="url(#rayG)"/><path d="M1220 140 L984 603 L937 576Z" fill="url(#rayG)"/><path d="M1220 140 L840 495 L805 453Z" fill="url(#rayG)"/><path d="M1220 140 L741 343 L723 292Z" fill="url(#rayG)"/><path d="M1220 140 L701 167 L701 113Z" fill="url(#rayG)"/><path d="M1220 140 L723 -12 L741 -63Z" fill="url(#rayG)"/><path d="M1220 140 L805 -173 L840 -215Z" fill="url(#rayG)"/><path d="M1220 140 L937 -296 L984 -323Z" fill="url(#rayG)"/><path d="M1220 140 L1103 -367 L1157 -376Z" fill="url(#rayG)"/><path d="M1220 140 L1283 -376 L1337 -367Z" fill="url(#rayG)"/><path d="M1220 140 L1456 -323 L1503 -296Z" fill="url(#rayG)"/><path d="M1220 140 L1600 -215 L1635 -173Z" fill="url(#rayG)"/><path d="M1220 140 L1699 -63 L1717 -12Z" fill="url(#rayG)"/></g>
+<circle cx="1220" cy="140" r="58" fill="url(#sunG)"/>
+<g class="cl" style="animation-duration:130s;animation-delay:-40s"><g transform="translate(0 130) scale(1)" filter="url(#soft)" fill="#fff" opacity=".93"><ellipse cx="0" cy="0" rx="90" ry="26"/><ellipse cx="-40" cy="6" rx="60" ry="20"/><ellipse cx="50" cy="8" rx="64" ry="20"/><ellipse cx="8" cy="-18" rx="50" ry="24"/></g></g><g class="cl" style="animation-duration:170s;animation-delay:-110s"><g transform="translate(0 230) scale(0.8)" filter="url(#soft)" fill="#fff" opacity=".93"><ellipse cx="0" cy="0" rx="90" ry="26"/><ellipse cx="-40" cy="6" rx="60" ry="20"/><ellipse cx="50" cy="8" rx="64" ry="20"/><ellipse cx="8" cy="-18" rx="50" ry="24"/></g></g><g class="cl" style="animation-duration:150s;animation-delay:-90s"><g transform="translate(0 70) scale(0.6)" filter="url(#soft)" fill="#fff" opacity=".93"><ellipse cx="0" cy="0" rx="90" ry="26"/><ellipse cx="-40" cy="6" rx="60" ry="20"/><ellipse cx="50" cy="8" rx="64" ry="20"/><ellipse cx="8" cy="-18" rx="50" ry="24"/></g></g>
+<path d="M0 560 C200 500 380 540 560 520 C760 495 960 560 1180 520 C1300 500 1380 520 1440 510 L1440 900 L0 900Z" fill="url(#hillFar)"/>
+<path d="M0 650 C180 590 360 640 560 610 C800 575 980 650 1200 615 C1320 595 1400 620 1440 610 L1440 900 L0 900Z" fill="url(#hillMid)"/>
+<g transform="translate(170 590) scale(1)"><rect x="-4" y="0" width="8" height="34" rx="3" fill="#6b4a2c"/><circle cx="0" cy="-8" r="26" fill="url(#treeG)"/><circle cx="-18" cy="6" r="19" fill="url(#treeG)"/><circle cx="18" cy="6" r="19" fill="url(#treeG)"/></g><g transform="translate(330 615) scale(0.8)"><rect x="-4" y="0" width="8" height="34" rx="3" fill="#6b4a2c"/><circle cx="0" cy="-8" r="26" fill="url(#treeG)"/><circle cx="-18" cy="6" r="19" fill="url(#treeG)"/><circle cx="18" cy="6" r="19" fill="url(#treeG)"/></g><g transform="translate(1060 600) scale(0.9)"><rect x="-4" y="0" width="8" height="34" rx="3" fill="#6b4a2c"/><circle cx="0" cy="-8" r="26" fill="url(#treeG)"/><circle cx="-18" cy="6" r="19" fill="url(#treeG)"/><circle cx="18" cy="6" r="19" fill="url(#treeG)"/></g><g transform="translate(1290 585) scale(1.1)"><rect x="-4" y="0" width="8" height="34" rx="3" fill="#6b4a2c"/><circle cx="0" cy="-8" r="26" fill="url(#treeG)"/><circle cx="-18" cy="6" r="19" fill="url(#treeG)"/><circle cx="18" cy="6" r="19" fill="url(#treeG)"/></g>
+<path d="M0 760 C240 710 420 770 700 740 C980 710 1180 780 1440 735 L1440 900 L0 900Z" fill="url(#hillNear)"/>
+<g transform="translate(507 875)"><circle r="4.5" fill="#c56cf0"/><circle r="1.5" fill="#ffd23f"/></g><g transform="translate(287 847)"><circle r="4.5" fill="#c56cf0"/><circle r="1.5" fill="#ffd23f"/></g><g transform="translate(990 880)"><circle r="4.5" fill="#c56cf0"/><circle r="1.5" fill="#ffd23f"/></g><g transform="translate(154 877)"><circle r="4.5" fill="#ff6b81"/><circle r="1.5" fill="#ffd23f"/></g><g transform="translate(980 833)"><circle r="4.5" fill="#c56cf0"/><circle r="1.5" fill="#ffd23f"/></g><g transform="translate(499 824)"><circle r="4.5" fill="#ff9f43"/><circle r="1.5" fill="#ffd23f"/></g><g transform="translate(1127 870)"><circle r="4.5" fill="#ff9f43"/><circle r="1.5" fill="#ffd23f"/></g><g transform="translate(833 819)"><circle r="4.5" fill="#ffd23f"/><circle r="1.5" fill="#ffd23f"/></g><g transform="translate(1320 819)"><circle r="4.5" fill="#c56cf0"/><circle r="1.5" fill="#ffd23f"/></g><g transform="translate(818 801)"><circle r="4.5" fill="#ff6b81"/><circle r="1.5" fill="#ffd23f"/></g><g transform="translate(346 875)"><circle r="4.5" fill="#ff6b81"/><circle r="1.5" fill="#ffd23f"/></g><g transform="translate(636 803)"><circle r="4.5" fill="#ffffff"/><circle r="1.5" fill="#ffd23f"/></g><g transform="translate(988 876)"><circle r="4.5" fill="#ff9f43"/><circle r="1.5" fill="#ffd23f"/></g><g transform="translate(894 850)"><circle r="4.5" fill="#c56cf0"/><circle r="1.5" fill="#ffd23f"/></g><g transform="translate(930 817)"><circle r="4.5" fill="#ffffff"/><circle r="1.5" fill="#ffd23f"/></g><g transform="translate(219 804)"><circle r="4.5" fill="#ffd23f"/><circle r="1.5" fill="#ffd23f"/></g><g transform="translate(1033 827)"><circle r="4.5" fill="#ffffff"/><circle r="1.5" fill="#ffd23f"/></g><g transform="translate(1396 855)"><circle r="4.5" fill="#ffffff"/><circle r="1.5" fill="#ffd23f"/></g><g transform="translate(882 864)"><circle r="4.5" fill="#ff9f43"/><circle r="1.5" fill="#ffd23f"/></g><g transform="translate(1195 844)"><circle r="4.5" fill="#c56cf0"/><circle r="1.5" fill="#ffd23f"/></g><g transform="translate(1218 852)"><circle r="4.5" fill="#c56cf0"/><circle r="1.5" fill="#ffd23f"/></g><g transform="translate(495 843)"><circle r="4.5" fill="#ff6b81"/><circle r="1.5" fill="#ffd23f"/></g><g transform="translate(592 877)"><circle r="4.5" fill="#ffd23f"/><circle r="1.5" fill="#ffd23f"/></g><g transform="translate(688 869)"><circle r="4.5" fill="#c56cf0"/><circle r="1.5" fill="#ffd23f"/></g><g transform="translate(1185 813)"><circle r="4.5" fill="#ffd23f"/><circle r="1.5" fill="#ffd23f"/></g><g transform="translate(1316 873)"><circle r="4.5" fill="#ffffff"/><circle r="1.5" fill="#ffd23f"/></g><g transform="translate(603 815)"><circle r="4.5" fill="#ff6b81"/><circle r="1.5" fill="#ffd23f"/></g><g transform="translate(1007 861)"><circle r="4.5" fill="#ff6b81"/><circle r="1.5" fill="#ffd23f"/></g><g transform="translate(724 808)"><circle r="4.5" fill="#ff9f43"/><circle r="1.5" fill="#ffd23f"/></g><g transform="translate(328 802)"><circle r="4.5" fill="#ffffff"/><circle r="1.5" fill="#ffd23f"/></g>
+</svg>
+
+  <!-- Top navigation -->
+  <header class="nav">
+    <span class="logo">🌱 Mind Garden</span>
+    <nav>
+      <button class="nav-btn" data-view="home">Home</button>
+      <button class="nav-btn" data-view="garden">My garden</button>
+    </nav>
+  </header>
+
+  <!-- HOME PAGE -->
+  <main id="home" class="view">
+    <section class="hero">
+      <h1>Mind Garden</h1>
+      <p class="tagline">Plant your ideas, watch them grow.</p>
+      <p class="intro">Save your ideas as seeds. Add a to-do list to each idea. Every task you finish helps your plant grow from a tiny seed into a full plant.</p>
+      <button class="btn big" id="open-plant">Plant an idea</button>
+    </section>
+
+    <section class="panel">
+      <h2>Your plants</h2>
+      <div id="home-list" class="chips"></div>
+    </section>
+  </main>
+
+  <!-- GARDEN PAGE -->
+  <main id="garden" class="view" hidden>
+    <div class="garden-top">
+      <h2>My garden</h2>
+      <button class="btn" id="open-plant-2">Plant an idea</button>
+    </div>
+    <div id="garden-grid" class="garden-grid"></div>
+  </main>
+
+  <!-- PLANT AN IDEA FORM -->
+  <dialog id="plant-dialog">
+    <form id="plant-form">
+      <h2>Plant an idea</h2>
+
+      <label>Idea name
+        <input id="f-name" required maxlength="60" placeholder="e.g. Weekend cooking club">
+      </label>
+
+      <label>Short description
+        <textarea id="f-desc" required rows="2" maxlength="200" placeholder="What is the idea?"></textarea>
+      </label>
+
+      <label>Category
+        <select id="f-cat">
+          <option>Personal</option>
+          <option>Work</option>
+          <option>Study</option>
+          <option>Business</option>
+          <option>Creative</option>
+          <option>Other</option>
+        </select>
+      </label>
+
+      <label>Why is this idea useful?
+        <textarea id="f-why" required rows="2" maxlength="200" placeholder="How could it help?"></textarea>
+      </label>
+
+      <div class="row">
+        <button type="button" class="btn ghost" id="cancel-plant">Cancel</button>
+        <button type="submit" class="btn">Plant seed</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- PLANT DETAILS -->
+  <dialog id="detail-dialog">
+    <div class="detail">
+      <div class="detail-plant" id="d-plant"></div>
+      <h2 id="d-name"></h2>
+      <p id="d-msg" class="msg">&nbsp;</p>
+
+      <dl>
+        <dt>Description</dt><dd id="d-desc"></dd>
+        <dt>Category</dt><dd id="d-cat"></dd>
+        <dt>Why it is useful</dt><dd id="d-why"></dd>
+        <dt>Current stage</dt><dd id="d-stage"></dd>
+        <dt>Progress</dt>
+        <dd>
+          <div class="bar"><div id="d-bar"></div></div>
+          <span id="d-pct"></span>
+        </dd>
+      </dl>
+
+      <!-- To-do list -->
+      <h3 class="todo-title">To-do list <span id="t-count"></span></h3>
+      <form id="task-form" class="task-form">
+        <input id="task-input" required maxlength="80" placeholder="Add a task">
+        <button type="submit" class="btn">Add</button>
+      </form>
+      <ul id="task-list" class="tasks"></ul>
+      <button class="btn ghost wide" id="view-all-btn">View all to-do's</button>
+
+      <div class="row actions">
+        <button class="btn danger" id="remove-btn">🗑️ Remove idea</button>
+        <button class="btn ghost" id="close-detail">Close</button>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- ALL TO-DO'S -->
+  <dialog id="todo-dialog">
+    <h2>All to-do's</h2>
+    <p id="todo-idea" class="msg"></p>
+    <ul id="all-tasks" class="tasks"></ul>
+    <div class="row"><span></span><button class="btn" id="close-todo">Done</button></div>
+  </dialog>
+
+  <script>
+// ============================================================
+// Mind Garden - script.js
+// 1. Data   2. Plant drawings   3. Screens   4. To-do list   5. Actions
+// ============================================================
+
+// ---------- 1. DATA ----------
+const STAGES = ["Seed", "Sprout", "Growing", "Mature"];
+const STORAGE_KEY = "mindGardenIdeas";
+
+let ideas = loadIdeas();
+let openId = null;      // idea shown in the details window
+let shownStage = 0;     // used to animate the plant when its stage changes
+let editingId = null;   // task currently being edited
+
+function loadIdeas() {
+  let list = [];
+  try {
+    list = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+  } catch (e) {}
+  list.forEach(i => (i.tasks = i.tasks || [])); // older ideas had no tasks
+  return list;
+}
+
+function saveIdeas() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(ideas));
+}
+
+// Progress is worked out from completed tasks: 2 of 4 done = 50%
+function progressOf(idea) {
+  if (idea.tasks.length === 0) return 0;
+  const done = idea.tasks.filter(t => t.done).length;
+  return Math.round((done / idea.tasks.length) * 100);
+}
+
+// Mature only at 100%
+function stageOf(idea) {
+  const p = progressOf(idea);
+  if (p >= 100) return 3;
+  if (p >= 50) return 2;
+  if (p >= 25) return 1;
+  return 0;
+}
+
+const current = () => ideas.find(i => i.id === openId);
+
+// ---------- 2. PLANT DRAWINGS (simple SVG) ----------
+function plantSVG(stage, animate) {
+  // Soil mound with small stones (gradients live in the SVG at the top of index.html)
+  const soil = `
+    <ellipse cx="50" cy="95" rx="36" ry="5" fill="rgba(0,0,0,.18)"/>
+    <path d="M14 95 Q20 83 50 82 Q80 83 86 95 Z" fill="url(#soilG)"/>
+    <g fill="#3d2514" opacity=".55"><circle cx="30" cy="90" r="1"/><circle cx="42" cy="87" r="1.1"/><circle cx="60" cy="89" r="1"/><circle cx="72" cy="91" r="1.2"/></g>
+    <g fill="#d2ae86" opacity=".85"><circle cx="36" cy="92" r="1.4"/><circle cx="66" cy="86" r="1.2"/></g>`;
+
+  // A leaf with a light vein. dir: -1 left, 1 right. s: size.
+  const leaf = (x, y, dir, s, rot, g) =>
+    `<g transform="translate(${x} ${y}) scale(${dir * s} ${s}) rotate(${rot || -25})">
+       <path d="M0 0 C5 -12 20 -12 27 -2 C19 7 7 6 0 0Z" fill="url(#${g || "leafG"})"/>
+       <path d="M1 -.5 Q13 -4.5 25 -2" stroke="#fff" stroke-opacity=".4" stroke-width=".9" fill="none"/>
+     </g>`;
+
+  // A stem that is thicker at the bottom
+  const stem = (top, w) =>
+    `<path d="M${50 - w} 91 C${50 - w} 70 ${50 - w * .6} ${top + 20} ${50 - w * .5} ${top} L${50 + w * .5} ${top} C${50 + w * .6} ${top + 20} ${50 + w} 70 ${50 + w} 91Z" fill="url(#stemG)"/>`;
+
+  let plant = "";
+  if (stage === 0) {
+    plant = `<ellipse cx="50" cy="84" rx="8" ry="5.5" fill="url(#seedG)"/>
+             <path d="M45 82 Q50 80 55 83" stroke="#fff" stroke-opacity=".35" stroke-width="1" fill="none"/>`;
+  } else if (stage === 1) {
+    plant = stem(66, 1.3) + leaf(50, 68, -1, .9, -35) + leaf(50, 68, 1, .9, -35, "leafL");
+  } else if (stage === 2) {
+    plant = stem(40, 1.8) + leaf(50, 82, -1, 1) + leaf(50, 74, 1, 1, -25, "leafL") +
+            leaf(50, 62, -1, .95, -25, "leafL") + leaf(50, 54, 1, .9) + leaf(50, 46, -1, .8, -25, "leafL") +
+            `<ellipse cx="50" cy="37" rx="3.6" ry="5.5" fill="url(#leafL)"/>`;
+  } else {
+    // Sunflower: back petals, front petals, seed head
+    let back = "", front = "", dots = "";
+    for (let i = 0; i < 14; i++) {
+      back += `<ellipse cx="0" cy="-13" rx="3.8" ry="8.5" fill="url(#petalG)" transform="rotate(${i * 360 / 14})"/>`;
+      front += `<ellipse cx="0" cy="-11.5" rx="3.4" ry="7.5" fill="url(#petalG)" opacity=".95" transform="rotate(${i * 360 / 14 + 12.9})"/>`;
+    }
+    for (let i = 0; i < 10; i++) {
+      const a = i * 36 * Math.PI / 180;
+      dots += `<circle cx="${(5.2 * Math.cos(a)).toFixed(1)}" cy="${(5.2 * Math.sin(a)).toFixed(1)}" r=".9"/>`;
+    }
+    plant = stem(32, 2.1) + leaf(50, 84, -1, 1.15) + leaf(50, 77, 1, 1.15, -25, "leafL") +
+            leaf(50, 65, -1, 1.05, -25, "leafL") + leaf(50, 57, 1, 1) + leaf(50, 48, -1, .9, -25, "leafL") +
+            `<g transform="translate(50 24) scale(.95)">${back}${front}
+               <circle r="9" fill="url(#centerG)"/><g fill="#120a03" opacity=".6">${dots}<circle r="1"/></g></g>
+             <circle class="spark" cx="20" cy="22" r="2" fill="#fff6a8"/>
+             <circle class="spark s2" cx="82" cy="14" r="2.2" fill="#fff"/>
+             <circle class="spark s3" cx="76" cy="44" r="1.8" fill="#fff6a8"/>`;
+  }
+
+  return `<svg class="plant-svg" viewBox="0 0 100 100" aria-hidden="true">
+            ${soil}<g class="${animate ? "grow" : ""}"><g class="${stage === 0 ? "bob" : "sway"}">${plant}</g></g>
+          </svg>`;
+}
+
+// ---------- 3. SCREENS ----------
+function showView(name) {
+  document.querySelectorAll(".view").forEach(v => (v.hidden = v.id !== name));
+  document.querySelectorAll(".nav-btn").forEach(b =>
+    b.classList.toggle("active", b.dataset.view === name)
+  );
+}
+
+function renderHome() {
+  const box = document.getElementById("home-list");
+  box.innerHTML = "";
+  if (ideas.length === 0) {
+    box.innerHTML = `<p class="empty">Your garden is empty. Plant your first idea!</p>`;
+    return;
+  }
+  ideas.forEach(idea => {
+    const chip = document.createElement("button");
+    chip.className = "chip";
+    const stage = stageOf(idea);
+    chip.innerHTML = plantSVG(stage, false) +
+      `<span class="chip-text"><strong></strong><em></em><small>${STAGES[stage]} · ${progressOf(idea)}%</small></span>`;
+    chip.querySelector("strong").textContent = idea.name;
+    chip.querySelector("em").textContent = "Why: " + idea.why; // the reason for this idea
+    chip.onclick = () => openDetails(idea.id);
+    box.appendChild(chip);
+  });
+}
+
+function renderGarden(newId) {
+  const grid = document.getElementById("garden-grid");
+  grid.innerHTML = "";
+  if (ideas.length === 0) {
+    grid.innerHTML = `<p class="empty">Nothing planted yet. Click "Plant an idea" to start.</p>`;
+    return;
+  }
+  ideas.forEach(idea => {
+    const stage = stageOf(idea);
+    const plot = document.createElement("button");
+    plot.className = "plot";
+    plot.innerHTML = plantSVG(stage, idea.id === newId) +
+      `<div class="soil"><strong></strong><small>${STAGES[stage]} · ${progressOf(idea)}%</small><div class="mini"><i style="width:${progressOf(idea)}%"></i></div></div>`;
+    plot.querySelector("strong").textContent = idea.name;
+    plot.onclick = () => openDetails(idea.id);
+    grid.appendChild(plot);
+  });
+}
+
+function renderAll(newId) {
+  renderHome();
+  renderGarden(newId);
+}
+
+function renderDetails(animate) {
+  const idea = current();
+  if (!idea) return;
+  const stage = stageOf(idea);
+  const progress = progressOf(idea);
+  const done = idea.tasks.filter(t => t.done).length;
+
+  document.getElementById("d-plant").innerHTML = plantSVG(stage, animate);
+  document.getElementById("d-name").textContent = idea.name;
+  document.getElementById("d-desc").textContent = idea.desc;
+  document.getElementById("d-cat").textContent = idea.category;
+  document.getElementById("d-why").textContent = idea.why;
+  document.getElementById("d-stage").textContent = STAGES[stage];
+  document.getElementById("d-bar").style.width = progress + "%";
+  document.getElementById("d-pct").textContent = progress + "%";
+  document.getElementById("d-msg").innerHTML =
+    progress === 100 ? "Fully grown. Well done! 🌸" : "&nbsp;";
+  document.getElementById("t-count").textContent =
+    idea.tasks.length ? `(${done} of ${idea.tasks.length} done)` : "";
+
+  renderTasks(document.getElementById("task-list"), idea, 3); // short preview
+}
+
+function openDetails(id) {
+  openId = id;
+  editingId = null;
+  shownStage = stageOf(current());
+  renderDetails(false);
+  document.getElementById("detail-dialog").showModal();
+}
+
+// ---------- 4. TO-DO LIST ----------
+// Draws the tasks into a list. "limit" shows only the first few tasks.
+function renderTasks(listEl, idea, limit) {
+  listEl.innerHTML = "";
+  if (idea.tasks.length === 0) {
+    listEl.innerHTML = `<li class="more">No tasks yet. Add one to start growing.</li>`;
+    return;
+  }
+  const shown = limit ? idea.tasks.slice(0, limit) : idea.tasks;
+  shown.forEach(task => listEl.appendChild(taskRow(task, idea)));
+  if (limit && idea.tasks.length > limit) {
+    const more = document.createElement("li");
+    more.className = "more";
+    more.textContent = `+ ${idea.tasks.length - limit} more`;
+    listEl.appendChild(more);
+  }
+}
+
+function taskRow(task, idea) {
+  const li = document.createElement("li");
+  li.className = "task" + (task.done ? " done" : "");
+
+  // Checkbox: complete / un-complete
+  const box = document.createElement("input");
+  box.type = "checkbox";
+  box.checked = task.done;
+  box.setAttribute("aria-label", "Mark task complete");
+  box.onchange = () => { task.done = box.checked; taskChanged(); };
+  li.appendChild(box);
+
+  if (editingId === task.id) {
+    // Edit mode
+    const input = document.createElement("input");
+    input.className = "edit-input";
+    input.value = task.text;
+    input.maxLength = 80;
+    const save = () => {
+      const text = input.value.trim();
+      if (text) task.text = text;
+      editingId = null;
+      taskChanged();
+    };
+    input.onkeydown = e => {
+      if (e.key === "Enter") save();
+      if (e.key === "Escape") { e.preventDefault(); editingId = null; taskChanged(); }
+    };
+    const saveBtn = iconButton("✔️", "Save task", save);
+    li.append(input, saveBtn);
+    setTimeout(() => input.focus(), 0);
+  } else {
+    // Normal mode
+    const text = document.createElement("span");
+    text.className = "text";
+    text.textContent = task.text;
+    li.append(
+      text,
+      iconButton("✏️", "Edit task", () => { editingId = task.id; taskChanged(); }),
+      iconButton("🗑️", "Delete task", () => {
+        idea.tasks = idea.tasks.filter(t => t.id !== task.id);
+        taskChanged();
+      })
+    );
+  }
+  return li;
+}
+
+function iconButton(symbol, label, onClick) {
+  const b = document.createElement("button");
+  b.type = "button";
+  b.className = "icon-btn";
+  b.textContent = symbol;
+  b.setAttribute("aria-label", label);
+  b.onclick = onClick;
+  return b;
+}
+
+// Runs after ANY task change: save, update progress, plant and lists
+function taskChanged() {
+  saveIdeas();
+  const stage = stageOf(current());
+  const animate = stage !== shownStage; // animate only if the plant stage changed
+  shownStage = stage;
+  renderDetails(animate);
+  renderAllTasks();
+  renderAll();
+  if (animate && stage === 3) petalBurst(); // celebrate when fully grown
+}
+
+// Falling flower petals when an idea reaches 100%
+function petalBurst() {
+  const area = document.getElementById("d-plant");
+  for (let i = 0; i < 14; i++) {
+    const p = document.createElement("span");
+    p.className = "petal";
+    p.textContent = i % 3 === 0 ? "✨" : "🌸";
+    p.style.left = Math.random() * 90 + "%";
+    p.style.animationDelay = Math.random() * 0.5 + "s";
+    area.appendChild(p);
+    setTimeout(() => p.remove(), 2400);
+  }
+}
+
+function renderAllTasks() {
+  if (!document.getElementById("todo-dialog").open) return;
+  renderTasks(document.getElementById("all-tasks"), current(), 0);
+}
+
+// ---------- 5. ACTIONS ----------
+function openPlantForm() {
+  document.getElementById("plant-form").reset();
+  document.getElementById("plant-dialog").showModal();
+}
+
+document.getElementById("open-plant").onclick = openPlantForm;
+document.getElementById("open-plant-2").onclick = openPlantForm;
+document.getElementById("cancel-plant").onclick = () =>
+  document.getElementById("plant-dialog").close();
+
+// Plant seed
+document.getElementById("plant-form").onsubmit = e => {
+  e.preventDefault();
+  const idea = {
+    id: Date.now(),
+    name: document.getElementById("f-name").value.trim(),
+    desc: document.getElementById("f-desc").value.trim(),
+    category: document.getElementById("f-cat").value,
+    why: document.getElementById("f-why").value.trim(),
+    tasks: []
+  };
+  ideas.push(idea);
+  saveIdeas();
+  document.getElementById("plant-dialog").close();
+  renderAll(idea.id);
+  showView("garden");
+};
+
+// Add a task
+document.getElementById("task-form").onsubmit = e => {
+  e.preventDefault();
+  const input = document.getElementById("task-input");
+  const text = input.value.trim();
+  if (!text) return;
+  current().tasks.push({ id: Date.now() + Math.random(), text: text, done: false });
+  input.value = "";
+  taskChanged();
+  input.focus();
+};
+
+// View all to-do's
+document.getElementById("view-all-btn").onclick = () => {
+  editingId = null;
+  document.getElementById("todo-idea").textContent = current().name;
+  document.getElementById("todo-dialog").showModal();
+  renderAllTasks();
+};
+
+document.getElementById("close-todo").onclick = () =>
+  document.getElementById("todo-dialog").close();
+
+document.getElementById("todo-dialog").onclose = () => {
+  editingId = null;
+  renderDetails(false);
+};
+
+// Remove idea
+document.getElementById("remove-btn").onclick = () => {
+  if (!confirm("Remove this idea from your garden?")) return;
+  ideas = ideas.filter(i => i.id !== openId);
+  saveIdeas();
+  document.getElementById("detail-dialog").close();
+  renderAll();
+};
+
+document.getElementById("close-detail").onclick = () =>
+  document.getElementById("detail-dialog").close();
+
+// Navigation buttons
+document.querySelectorAll(".nav-btn").forEach(btn => {
+  btn.onclick = () => showView(btn.dataset.view);
+});
+
+// ---------- START ----------
+renderAll();
+showView("home");
+
+</script>
+</body>
+</html>
