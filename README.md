@@ -1,5 +1,7 @@
 # 🌱 Mind Garden
 
+Project link - https://dancing-maamoul-39afdd.netlify.app/
+
 **Plant your ideas, watch them grow.**
 
 Mind Garden is a simple, friendly website for saving your ideas and watching them grow. Every idea starts as a seed in your garden. Add a to-do list to each idea, and every task you finish grows the plant from a seed to a sprout to a full sunflower.
